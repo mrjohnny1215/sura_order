@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수라간 실시간 발주 체크리스트</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
+        header { max-width: 1200px; margin: 0 auto 20px; background: var(--primary-color); color: white; padding: 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        
+        .title-zone h1 { font-size: 24px; }
+        .title-zone .today-date { font-size: 14px; color: #f1c40f; margin-top: 4px; font-weight: bold; }
+        
+        .summary-box { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 5px; text-align: right; }
+        .summary-box span { font-weight: bold; color: #f1c40f; }
+
+        .controls { max-width: 1200px; margin: 0 auto 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .search-bar { flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .filter-select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: white; }
+        .btn-copy { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-copy:hover { background: #219653; }
+
+        .grid-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .vendor-card { background: var(--card-bg); border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; border-top: 5px solid var(--primary-color); }
+        .vendor-name { font-size: 18px; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #eee; color: var(--primary-color); display: flex; justify-content: space-between; align-items: center; }
+        .vendor-tag { font-size: 11px; background: #eef2f7; padding: 3px 8px; border-radius: 10px; color: #555; font-weight: bold; }
+
+        .item-list { list-style: none; }
+        .item-row { padding: 12px 0; border-bottom: 1px solid #f1f1f1; display: flex; flex-direction: column; gap: 8px; }
+        .item-row:hover { background-color: #fafafa; }
+        
+        .item-main-zone { display: flex; align-items: center; gap: 12px; cursor: pointer; width: 100%; }
+        .item-info { flex: 1; }
+        .item-name { font-weight: bold; font-size: 14px; color: #333; }
+        .item-details { font-size: 11px; color: #888; margin-top: 2px; }
+        
+        .checkbox-btn { width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 5px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: white; flex-shrink: 0; }
+        .checkbox-btn::after { content: '✓'; color: white; display: none; font-weight: bold; font-size: 13px; }
+        
+        .volume-zone { display: none; flex-wrap: wrap; gap: 6px; padding-left: 34px; margin-top: 4px; }
+        .opt-btn { background: #f1f3f5; border: 1px solid #dee2e6; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; color: #495057; font-weight: bold; }
+        .opt-btn.active { background: #e74c3c; color: white; border-color: #e74c3c; }
+        .custom-input { width: 90px; padding: 4px 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 12px; font-weight: bold; text-align: center; }
+
+        .item-row.checked { background-color: #fff8f8; }
+        .item-row.checked .checkbox-btn { background: var(--accent-color); border-color: var(--accent-color); }
+        .item-row.checked .checkbox-btn::after { display: block; }
+        .item-row.checked .item-name { color: var(--accent-color); }
+        .item-row.checked .volume-zone { display: flex; }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; text-align: center; }
+            .summary-box { text-align: center; width: 100%; }
+            .controls { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="title-zone">
+            <h1>수라간 발주 체크리스트</h1>
+            <div id="print-date" class="today-date">오늘 날짜 불러오는 중...</div>
+        </div>
+        <div class="summary-box">
+            현재 선택된 발주 품목: <span id="total-checked">0</span>개
+        </div>
+    </header>
+
+    <div class="controls">
+        <input type="text" id="search" class="search-bar" placeholder="품목명 또는 카테고리 검색..." oninput="filterItems()">
+        <select id="filter-vendor" class="filter-select" onchange="filterItems()">
+            <option value="all">전체 거래처 보기</option>
+        </select>
+        <button class="btn-copy" onclick="copyToClipboard()">📋 카톡 전송용 복사</button>
+    </div>
+
+    <div class="grid-container" id="card-container"></div>
+
+    <script>
+        // 전재료 57개 리스트 및 용량 옵션 세팅
+        const orderData = [
+            { id: 1, vendor: "수정물산 (고기)", category: "고기류", name: "제육", options: ["2박스", "1박스", "3박스"], cycle: "주 2회 (화/금)" },
+            { id: 2, vendor: "수정물산 (고기)", category: "고기류", name: "수입 삼겹살(냉동)", options: ["1판", "2판"], cycle: "필요시" },
+            { id: 3, vendor: "수정물산 (고기)", category: "고기류", name: "대패삼겹살", options: ["2kg", "4kg"], cycle: "필요시" },
+            { id: 4, vendor: "참기름 주문", category: "기름류", name: "들기름", options: ["3통", "1통", "2통"], cycle: "월 1회 (말일)" },
+            { id: 5, vendor: "참기름 주문", category: "기름류", name: "참기름", options: ["3통", "1통", "2통"], cycle: "월 1회 (말일)" },
+            { id: 6, vendor: "주왕산김치", category: "김치류", name: "총각김치", options: ["30kg", "40kg", "60kg", "80kg", "10kg"], cycle: "주 1회 (화)" },
+            { id: 7, vendor: "주왕산김치", category: "김치류", name: "썰어진 맛김치", options: ["10kg", "20kg", "30kg", "40kg"], cycle: "주 1회 (화)" },
+            { id: 8, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "고등어", options: ["3박스", "5박스", "10박스"], cycle: "주 2회 (화/금)" },
+            { id: 9, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "민어", options: ["1박스", "2박스"], cycle: "주 2회 (화/금)" },
+            { id: 10, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "삼치", options: ["1박스", "2박스"], cycle: "주 2회 (화/금)" },
+            { id: 11, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "갈치", options: ["1박스", "2박스"], cycle: "주 1회" },
+            { id: 12, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "낙지", options: ["1박스", "2박스"], cycle: "주 1회" },
+            { id: 13, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "꼬막살 (왕특)", options: ["8팩", "1박스"], cycle: "주 1회" },
+            { id: 14, vendor: "파파쿡 (소스)", category: "소스류", name: "조림소스", options: ["10kg", "14kg", "20kg"], cycle: "주 1회 (월)" },
+            { id: 15, vendor: "파파쿡 (소스)", category: "소스류", name: "불고기소스", options: ["10kg", "20kg"], cycle: "주 1회 (월)" },
+            { id: 16, vendor: "파파쿡 (소스)", category: "소스류", name: "낙지볶음소스", options: ["10kg", "20kg"], cycle: "주 1회 (월)" },
+            { id: 17, vendor: "파파쿡 (소스)", category: "소스류", name: "청국장소스", options: ["10kg", "14kg"], cycle: "주 1회 (월)" },
+            { id: 18, vendor: "파파쿡 (소스)", category: "소스류", name: "흑임자샐러드소스", options: ["6kg", "10kg", "20kg"], cycle: "주 1회 (월)" },
+            { id: 19, vendor: "파파쿡 (소스)", category: "소스류", name: "달래간장소스", options: ["6kg", "10kg"], cycle: "주 1회 (월)" },
+            { id: 20, vendor: "파파쿡 (소스)", category: "소스류", name: "들깨볶음소스", options: ["6kg", "10kg"], cycle: "주 1회 (월)" },
+            { id: 21, vendor: "파파쿡 (소스)", category: "소스류", name: "장아찌간장소스", options: ["6kg", "10kg"], cycle: "주 1회 (월)" },
+            { id: 22, vendor: "파파쿡 (소스)", category: "소스류", name: "겉절이소스", options: ["4kg", "6kg", "10kg"], cycle: "주 1회 (월)" },
+            { id: 23, vendor: "파파쿡 (소스)", category: "소스류", name: "된장나물소스", options: ["4kg", "6kg"], cycle: "주 1회 (월)" },
+            { id: 24, vendor: "파파쿡 (소스)", category: "소스류", name: "생선풍미소스", options: ["4kg", "6kg", "10kg"], cycle: "주 1회 (월)" },
+            { id: 25, vendor: "파파쿡 (소스)", category: "소스류", name: "미역국(분말)소스", options: ["6kg"], cycle: "주 1회 (월)" },
+            { id: 26, vendor: "신흥정미소 (쌀)", category: "쌀류", name: "쌀 (20kg)", options: ["5마대", "10마대"], cycle: "7~10일 주기" },
+            { id: 27, vendor: "이성현 (식자재)", category: "농산물", name: "대파", options: ["2단", "3단", "4단"], cycle: "격일 (월/수/금)" },
+            { id: 28, vendor: "이성현 (식자재)", category: "농산물", name: "양파", options: ["1망", "2망"], cycle: "격일 (월/수/금)" },
+            { id: 29, vendor: "이성현 (식자재)", category: "농산물", name: "숙주나물", options: ["1박스", "2박스"], cycle: "격일 (월/수/금)" },
+            { id: 30, vendor: "이성현 (식자재)", category: "농산물", name: "양상추", options: ["1박스", "2박스"], cycle: "격일 (월/수/금)" },
+            { id: 31, vendor: "이성현 (식자재)", category: "농산물", name: "양배추", options: ["3개", "1망"], cycle: "격일 (월/수/금)" },
+            { id: 32, vendor: "이성현 (식자재)", category: "농산물", name: "무", options: ["1박스", "3개", "5개"], cycle: "격일 (월/수/금)" },
+            { id: 33, vendor: "이성현 (식자재)", category: "농산물", name: "치커리", options: ["1박스"], cycle: "격일 (월/수/금)" },
+            { id: 34, vendor: "이성현 (식자재)", category: "농산물", name: "부추", options: ["1단", "2단"], cycle: "격일 (월/수/금)" },
+            { id: 35, vendor: "이성현 (식자재)", category: "농산물", name: "쪽파", options: ["1단"], cycle: "격일 (월/수/금)" },
+            { id: 36, vendor: "이성현 (식자재)", category: "농산물", name: "꽈리고추", options: ["1kg", "2kg"], cycle: "격일 (월/수/금)" },
+            { id: 37, vendor: "이성현 (식자재)", category: "농산물", name: "당근", options: ["3kg", "5kg"], cycle: "격일 (월/수/금)" },
+            { id: 38, vendor: "이성현 (식자재)", category: "농산물", name: "미나리", options: ["1박스", "2박스"], cycle: "필요시" },
+            { id: 39, vendor: "이성현 (식자재)", category: "농산물", name: "통마늘 / 깐마늘", options: ["1봉", "2봉", "2kg"], cycle: "필요시" },
+            { id: 40, vendor: "이성현 (식자재)", category: "농산물", name: "마늘쫑", options: ["2개", "4단"], cycle: "필요시" },
+            { id: 41, vendor: "이성현 (식자재)", category: "농산물", name: "청양고추 / 피망 / 오이", options: ["소량", "1박스"], cycle: "필요시" },
+            { id: 42, vendor: "이성현 (식자재)", category: "농산물", name: "봄동", options: ["1박스"], cycle: "필요시" },
+            { id: 43, vendor: "이성현 (식자재)", category: "식자재", name: "두부", options: ["2판", "3판", "4판"], cycle: "격일 (월/수/금)" },
+            { id: 44, vendor: "이성현 (식자재)", category: "식자재", name: "메추리알 / 깐메추리알", options: ["1박스", "5봉"], cycle: "격일 (월/수/금)" },
+            { id: 45, vendor: "이성현 (식자재)", category: "식자재", name: "왕란 / 계란", options: ["1판", "2판"], cycle: "필요시" },
+            { id: 46, vendor: "이성현 (식자재)", category: "식자재", name: "당면", options: ["1박스"], cycle: "격일 (월/수/금)" },
+            { id: 47, vendor: "이성현 (식자재)", category: "식자재", name: "찰흑미", options: ["2봉", "1봉"], cycle: "필요시" },
+            { id: 48, vendor: "이성현 (식자재)", category: "식자재", name: "김자반", options: ["1봉", "2봉"], cycle: "필요시" },
+            { id: 49, vendor: "이성현 (식자재)", category: "식자재", name: "깐은행", options: ["2봉", "3봉"], cycle: "필요시" },
+            { id: 50, vendor: "이성현 (식자재)", category: "식자재", name: "강남콩통조림", options: ["4개", "1박스"], cycle: "필요시" },
+            { id: 51, vendor: "이성현 (식자재)", category: "식자재", name: "사각어묵 / 절단꽃게 / 닭정육", options: ["1팩", "1kg"], cycle: "필요시" },
+            { id: 52, vendor: "이성현 (식자재)", category: "식자재", name: "해물모듬 / 참치통조림(대)", options: ["1봉", "2봉"], cycle: "필요시" },
+            { id: 53, vendor: "이성현 (식자재)", category: "조미료", name: "진간장 / 국간장 / 참치액", options: ["1통", "2통", "3통"], cycle: "필요시" },
+            { id: 54, vendor: "이성현 (식자재)", category: "조미료", name: "노두유", options: ["2개", "3개"], cycle: "필요시" },
+            { id: 55, vendor: "이성현 (식자재)", category: "조미료", name: "설탕 / 미원 / 맛소금 / 꽃소금", options: ["1봉지", "2봉지"], cycle: "필요시" },
+            { id: 56, vendor: "이성현 (식자재)", category: "조미료", name: "식용유", options: ["1말", "2말"], cycle: "필요시" },
+            { id: 57, vendor: "이성현 (식자재)", category: "조미료", name: "들깨가루 / 감자전분 / 중력분", options: ["소량"], cycle: "필요시" },
+            { id: 58, vendor: "이성현 (식자재)", category: "조미료", name: "미림 / 된장 / 고추장 / 혼다시", options: ["소량"], cycle: "필요시" },
+            { id: 59, vendor: "이성현 (식자재)", category: "조미료", name: "맛술 / 물엿 / 마요네즈", options: ["소량"], cycle: "필요시" },
+            { id: 60, vendor: "이성현 (식자재)", category: "조미료", name: "가쓰오부시 / 통들깨 / 검은깨", options: ["소량"], cycle: "필요시" },
+            { id: 61, vendor: "이성현 (식자재)", category: "음료류", name: "코카콜라 / 제로콜라", options: ["1박스", "2박스"], cycle: "격일 (월/수/금)" },
+            { id: 62, vendor: "이성현 (식자재)", category: "음료류", name: "환타 / 스프라이트", options: ["1박스"], cycle: "격일 (월/수/금)" },
+            { id: 63, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "매원 (1.5L)", options: ["8개", "1박스"], cycle: "마감시 확인" },
+            { id: 64, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "단호박", options: ["14팩", "1박스"], cycle: "마감시 확인" },
+            { id: 65, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "사골육수", options: ["6팩", "1박스", "2박스"], cycle: "마감시 확인" },
+            { id: 66, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "느타리버섯", options: ["6봉", "1박스"], cycle: "마감시 확인" },
+            { id: 67, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "궁채 / 궁채순", options: ["10kg", "1박스"], cycle: "마감시 확인" },
+            { id: 68, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "생율 (깐밤)", options: ["10팩", "20팩"], cycle: "필요시" },
+            { id: 69, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "곤드레", options: ["10kg", "1박스"], cycle: "필요시" },
+            { id: 70, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "깐더덕", options: ["10kg", "1박스"], cycle: "필요시" },
+            { id: 71, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "오징어젓갈", options: ["20kg", "1박스"], cycle: "필요시" },
+            { id: 72, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "파래김", options: ["2박스", "1박스"], cycle: "필요시" },
+            { id: 73, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "맥코믹 후추 / 가루", options: ["4개"], cycle: "필요시" },
+            { id: 74, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "꼬막", options: ["8봉", "1박스"], cycle: "필요시" },
+            { id: 75, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "옥수수수염차원액", options: ["2통"], cycle: "필요시" },
+            { id: 76, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "와사비", options: ["필요시"], cycle: "필요시" },
+            { id: 77, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "물티슈", options: ["2박스", "1박스"], cycle: "주 1회 (마감확인)" },
+            { id: 78, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "무지 크라프트 종이컵", options: ["5박스", "1박스"], cycle: "주 1회 (마감확인)" },
+            { id: 79, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "일회용 반앞치마", options: ["1박스"], cycle: "필요시" },
+            { id: 80, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "츄파춥스 막대사탕 미니", options: ["100p"], cycle: "필요시" },
+            { id: 81, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "수저포장지 (수저집)", options: ["4박스"], cycle: "필요시" },
+            { id: 82, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "치실", options: ["2박스"], cycle: "필요시" },
+            { id: 83, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "이지락 워터건 (분무기류)", options: ["1개"], cycle: "필요시" },
+            { id: 84, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "크린콜", options: ["1말통"], cycle: "필요시" },
+            { id: 85, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "젤착화제", options: ["1박스"], cycle: "필요시" },
+            { id: 86, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "냅킨 / 행주 / 박스테이프", options: ["1박스"], cycle: "필요시" },
+            { id: 87, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "아이콘 칼라 화일 (명세서용)", options: ["1개"], cycle: "필요시" },
+            { id: 88, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "커터칼", options: ["5개"], cycle: "필요시" },
+            { id: 89, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "가글", options: ["2박스"], cycle: "필요시" },
+            { id: 90, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "니트릴장갑 / 라텍스장갑", options: ["1박스"], cycle: "필요시" },
+            { id: 91, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "쓰레기봉투 (파란색/검정색)", options: ["1묶음"], cycle: "필요시" },
+            { id: 92, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "위생장갑 / 롤팩 / 고무장갑", options: ["1박스"], cycle: "필요시" },
+            { id: 93, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "퐁퐁 / 주방세제 / 세제(비트)", options: ["1말", "7kg"], cycle: "필요시" },
+            { id: 94, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "수세미 (철/녹색) / 식세기 세제", options: ["1박스"], cycle: "필요시" }
+        ];
+
+        let selectedState = {};
+        let formattedDateString = "";
+
+        function getTodayDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            
+            const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+            const dayOfWeek = weekDays[now.getDay()];
+
+            formattedDateString = `${year}년 ${month}월 ${date}일 (${dayOfWeek})`;
+            document.getElementById('print-date').textContent = `📅 발주 기준일: ${formattedDateString}`;
+        }
+
+        function init() {
+            getTodayDate();
+
+            const filterSelect = document.getElementById('filter-vendor');
+            const vendors = [...new Set(orderData.map(item => item.vendor))];
+            
+            vendors.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v;
+                opt.textContent = v;
+                filterSelect.appendChild(opt);
+            });
+
+            orderData.forEach(item => {
+                selectedState[item.id] = {
+                    checked: false,
+                    value: item.options[0] || ""
+                };
+            });
+
+            renderCards(orderData);
+        }
+
+        function renderCards(data) {
+            const container = document.getElementById('card-container');
+            container.innerHTML = '';
+
+            // 거래처 단위로만 완벽히 그룹핑 (카테고리로 분리하지 않음)
+            const grouped = data.reduce((acc, item) => {
+                if (!acc[item.vendor]) acc[item.vendor] = [];
+                acc[item.vendor].push(item);
+                return acc;
+            }, {});
+
+            for (const vendor in grouped) {
+                const card = document.createElement('div');
+                card.className = 'vendor-card';
+                
+                // 식자재 종합 카드로 묶인 경우 직관적으로 '식자재 마트' 등으로 종합 태그 지정
+                const vTag = vendor.includes("이성현") ? "종합식자재" : grouped[vendor][0].category;
+                
+                card.innerHTML = `
+                    <div class="vendor-name">
+                        <span>${vendor}</span>
+                        <span class="vendor-tag">${vTag}</span>
+                    </div>
+                    <ul class="item-list">
+                        ${grouped[vendor].map(item => {
+                            const state = selectedState[item.id];
+                            const isChecked = state.checked ? 'checked' : '';
+                            
+                            let optionButtons = item.options.map(opt => {
+                                const activeClass = state.value === opt ? 'active' : '';
+                                return `<button class="opt-btn ${activeClass}" onclick="selectOption(${item.id}, '${opt}', this)">${opt}</button>`;
+                            }).join('');
+
+                            return `
+                                <li class="item-row ${isChecked}" id="row-${item.id}">
+                                    <div class="item-main-zone" onclick="toggleItem(${item.id})">
+                                        <div class="checkbox-btn"></div>
+                                        <div class="item-info">
+                                            <div class="item-name">${item.name}</div>
+                                            <div class="item-details">[${item.category}] 주기: ${item.cycle}</div>
+                                        </div>
+                                    </div>
+                                    <div class="volume-zone">
+                                        ${optionButtons}
+                                        <input type="text" class="custom-input" placeholder="직접입력" value="${item.options.includes(state.value) ? '' : state.value}" oninput="customInput(${item.id}, this)">
+                                    </div>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        function toggleItem(id) {
+            const row = document.getElementById(`row-${id}`);
+            selectedState[id].checked = !selectedState[id].checked;
+            
+            if (selectedState[id].checked) {
+                row.classList.add('checked');
+            } else {
+                row.classList.remove('checked');
+            }
+            updateTotalCount();
+        }
+
+        function selectOption(id, opt, btnBtn) {
+            selectedState[id].value = opt;
+            const pZone = btnBtn.parentElement;
+            pZone.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+            btnBtn.classList.add('active');
+            pZone.querySelector('.custom-input').value = '';
+        }
+
+        function customInput(id, input) {
+            selectedState[id].value = input.value;
+            const pZone = input.parentElement;
+            pZone.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function updateTotalCount() {
+            const count = Object.values(selectedState).filter(s => s.checked).length;
+            document.getElementById('total-checked').textContent = count;
+        }
+
+        function filterItems() {
+            const searchText = document.getElementById('search').value.toLowerCase();
+            const selectedVendor = document.getElementById('filter-vendor').value;
+
+            const filtered = orderData.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchText) || item.category.toLowerCase().includes(searchText);
+                const matchesVendor = selectedVendor === 'all' || item.vendor === selectedVendor;
+                return matchesSearch && matchesVendor;
+            });
+
+            renderCards(filtered);
+        }
+
+        function copyToClipboard() {
+            const activeIds = Object.keys(selectedState).filter(id => selectedState[id].checked);
+            
+            if (activeIds.length === 0) {
+                alert('선택된 발주 품목이 없습니다!');
+                return;
+            }
+
+            let text = `[${formattedDateString} 수라간 발주 요청 건]\n\n`;
+            const activeItems = orderData.filter(item => selectedState[item.id].checked);
+            
+            const grouped = activeItems.reduce((acc, item) => {
+                if (!acc[item.vendor]) acc[item.vendor] = [];
+                acc[item.vendor].push(item);
+                return acc;
+            }, {});
+
+            for (const vendor in grouped) {
+                text += `■ ${vendor}\n`;
+                grouped[vendor].forEach(item => {
+                    const finalVal = selectedState[item.id].value || "수량미정";
+                    text += `- ${item.name} : ${finalVal}\n`;
+                });
+                text += '\n';
+            }
+
+            navigator.clipboard.writeText(text.trim()).then(() => {
+                alert('하나로 합쳐진 발주 리스트가 복사되었습니다!\n카카오톡 대화창에 붙여넣기 하세요.');
+            }).catch(() => {
+                alert('복사에 실패했습니다.');
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
