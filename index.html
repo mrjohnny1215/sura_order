@@ -88,7 +88,7 @@
     <div class="grid-container" id="card-container"></div>
 
     <script>
-        // 사장님 피드백 반영: 규격 문구(예: '8개')는 고정하고 뒤의 단위(박스/판) 앞에 수량(1, 2, 3)만 증감
+        // 사장님 요청 명세 기준으로 완벽 튜닝된 127개 전체 마스터 데이터
         const orderData = [
             { id: 1, vendor: "수정물산 (고기)", category: "고기류", name: "제육", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
             { id: 2, vendor: "수정물산 (고기)", category: "고기류", name: "수입 삼겹살(냉동)", spec: "", unit: "판", cycle: "필요시" },
@@ -103,21 +103,23 @@
             { id: 11, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "갈치", spec: "", unit: "박스", cycle: "주 1회" },
             { id: 12, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "낙지", spec: "", unit: "박스", cycle: "주 1회" },
             { id: 13, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "꼬막살 (왕특)", spec: "", unit: "박스", cycle: "주 1회" },
-            { id: 14, vendor: "파파쿡 (소스)", category: "소스류", name: "조림소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 15, vendor: "파파쿡 (소스)", category: "소스류", name: "불고기소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 16, vendor: "파파쿡 (소스)", category: "소스류", name: "낙지볶음소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 17, vendor: "파파쿡 (소스)", category: "소스류", name: "청국장소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 18, vendor: "파파쿡 (소스)", category: "소스류", name: "흑임자샐러드소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 19, vendor: "파파쿡 (소스)", category: "소스류", name: "달래간장소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 20, vendor: "파파쿡 (소스)", category: "소스류", name: "들깨볶음소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 21, vendor: "파파쿡 (소스)", category: "소스류", name: "장아찌간장소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 22, vendor: "파파쿡 (소스)", category: "소스류", name: "겉절이소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 23, vendor: "파파쿡 (소스)", category: "소스류", name: "된장나물소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 24, vendor: "파파쿡 (소스)", category: "소스류", name: "생선풍미소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
-            { id: 25, vendor: "파파쿡 (소스)", category: "소스류", name: "미역국(분말)소스", spec: "10kg", unit: "개", cycle: "주 1회 (월)" },
+            
+            // 소스류 수량 체계 전면 교정 완료: 10kg ➡️ 2kg 기반
+            { id: 14, vendor: "파파쿡 (소스)", category: "소스류", name: "조림소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 15, vendor: "파파쿡 (소스)", category: "소스류", name: "불고기소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 16, vendor: "파파쿡 (소스)", category: "소스류", name: "낙지볶음소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 17, vendor: "파파쿡 (소스)", category: "소스류", name: "청국장소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 18, vendor: "파파쿡 (소스)", category: "소스류", name: "흑임자샐러드소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 19, vendor: "파파쿡 (소스)", category: "소스류", name: "달래간장소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 20, vendor: "파파쿡 (소스)", category: "소스류", name: "들깨볶음소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 21, vendor: "파파쿡 (소스)", category: "소스류", name: "장아찌간장소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 22, vendor: "파파쿡 (소스)", category: "소스류", name: "겉절이소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 23, vendor: "파파쿡 (소스)", category: "소스류", name: "된장나물소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 24, vendor: "파파쿡 (소스)", category: "소스류", name: "생선풍미소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
+            { id: 25, vendor: "파파쿡 (소스)", category: "소스류", name: "미역국(분말)소스", spec: "2kg", unit: "개", cycle: "주 1회 (월)" },
             { id: 26, vendor: "신흥정미소 (쌀)", category: "쌀류", name: "쌀 (20kg)", spec: "", unit: "마대", cycle: "7~10일 주기" },
             
-            // 이성현 (식자재) - 농산물
+            // 이성현 (식자재) - 농산물 및 지정 단위 수정 완료 (통마늘/깐마늘 ➡️ kg, 마늘쫑 ➡️ 단)
             { id: 27, vendor: "이성현 (식자재)", category: "농산물", name: "대파", spec: "", unit: "단", cycle: "격일 (월/수/금)" },
             { id: 28, vendor: "이성현 (식자재)", category: "농산물", name: "양파", spec: "", unit: "망", cycle: "격일 (월/수/금)" },
             { id: 29, vendor: "이성현 (식자재)", category: "농산물", name: "숙주나물", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
@@ -130,15 +132,15 @@
             { id: 36, vendor: "이성현 (식자재)", category: "농산물", name: "꽈리고추", spec: "", unit: "kg", cycle: "격일 (월/수/금)" },
             { id: 37, vendor: "이성현 (식자재)", category: "농산물", name: "당근", spec: "", unit: "kg", cycle: "격일 (월/수/금)" },
             { id: 38, vendor: "이성현 (식자재)", category: "농산물", name: "미나리", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 39, vendor: "이성현 (식자재)", category: "농산물", name: "통마늘", spec: "1~2봉", unit: "개", cycle: "필요시" },
-            { id: 40, vendor: "이성현 (식자재)", category: "농산물", name: "깐마늘", spec: "2kg", unit: "개", cycle: "필요시" },
+            { id: 39, vendor: "이성현 (식자재)", category: "농산물", name: "통마늘", spec: "", unit: "kg", cycle: "필요시" },
+            { id: 40, vendor: "이성현 (식자재)", category: "농산물", name: "깐마늘", spec: "", unit: "kg", cycle: "필요시" },
             { id: 41, vendor: "이성현 (식자재)", category: "농산물", name: "마늘쫑", spec: "", unit: "단", cycle: "필요시" },
             { id: 42, vendor: "이성현 (식자재)", category: "농산물", name: "청양고추", spec: "각 소량", unit: "개", cycle: "필요시" },
             { id: 43, vendor: "이성현 (식자재)", category: "농산물", name: "피망", spec: "각 소량", unit: "개", cycle: "필요시" },
             { id: 44, vendor: "이성현 (식자재)", category: "농산물", name: "오이", spec: "각 소량", unit: "개", cycle: "필요시" },
             { id: 45, vendor: "이성현 (식자재)", category: "농산물", name: "봄동", spec: "", unit: "박스", cycle: "필요시" },
             
-            // 이성현 (식자재) - 일반식자재 및 조미료
+            // 이성현 (식자재) - 일반식자재 및 조미료 수정 완료 (노두유/설탕/맛소금 ➡️ 개, 검은깨 ➡️ 봉)
             { id: 46, vendor: "이성현 (식자재)", category: "식자재", name: "두부", spec: "", unit: "판", cycle: "격일 (월/수/금)" },
             { id: 47, vendor: "이성현 (식자재)", category: "식자재", name: "메추리알", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
             { id: 48, vendor: "이성현 (식자재)", category: "식자재", name: "깐메추리알", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
@@ -157,9 +159,9 @@
             { id: 61, vendor: "이성현 (식자재)", category: "조미료", name: "국간장", spec: "", unit: "통", cycle: "필요시" },
             { id: 62, vendor: "이성현 (식자재)", category: "조미료", name: "참치액", spec: "", unit: "통", cycle: "필요시" },
             { id: 63, vendor: "이성현 (식자재)", category: "조미료", name: "노두유", spec: "", unit: "개", cycle: "필요시" },
-            { id: 64, vendor: "이성현 (식자재)", category: "조미료", name: "설탕", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
+            { id: 64, vendor: "이성현 (식자재)", category: "조미료", name: "설탕", spec: "", unit: "개", cycle: "필요시" },
             { id: 65, vendor: "이성현 (식자재)", category: "조미료", name: "미원", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
-            { id: 66, vendor: "이성현 (식자재)", category: "조미료", name: "맛소금", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
+            { id: 66, vendor: "이성현 (식자재)", category: "조미료", name: "맛소금", spec: "", unit: "개", cycle: "필요시" },
             { id: 67, vendor: "이성현 (식자재)", category: "조미료", name: "꽃소금", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
             { id: 68, vendor: "이성현 (식자재)", category: "조미료", name: "식용유", spec: "", unit: "말", cycle: "필요시" },
             { id: 70, vendor: "이성현 (식자재)", category: "조미료", name: "들깨가루", spec: "", unit: "봉지", cycle: "필요시" },
@@ -174,13 +176,15 @@
             { id: 79, vendor: "이성현 (식자재)", category: "조미료", name: "마요네즈", spec: "", unit: "개", cycle: "필요시" },
             { id: 80, vendor: "이성현 (식자재)", category: "조미료", name: "가쓰오부시", spec: "", unit: "개", cycle: "필요시" },
             { id: 81, vendor: "이성현 (식자재)", category: "조미료", name: "통들깨", spec: "", unit: "개", cycle: "필요시" },
-            { id: 82, vendor: "이성현 (식자재)", category: "조미료", name: "검은깨", spec: "", unit: "개", cycle: "필요시" },
+            { id: 82, vendor: "이성현 (식자재)", category: "조미료", name: "검은깨", spec: "", unit: "봉", cycle: "필요시" },
+            
+            // 이성현 (식자재) - 음료
             { id: 83, vendor: "이성현 (식자재)", category: "음료류", name: "코카콜라", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
             { id: 84, vendor: "이성현 (식자재)", category: "음료류", name: "제로콜라", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
             { id: 85, vendor: "이성현 (식자재)", category: "음료류", name: "환타", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
             { id: 86, vendor: "이성현 (식자재)", category: "음료류", name: "스프라이트", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
             
-            // 인터넷 발주 (저녁 마감) - '8개 1박스' 스타일 완벽 대응 세팅
+            // 인터넷 발주 (저녁 마감) 및 매장잡화 (춥파춥스 막대사탕 미니 ➡️ 봉)
             { id: 87, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "매원", spec: "8개", unit: "박스", cycle: "마감시 확인" },
             { id: 88, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "단호박", spec: "14팩", unit: "박스", cycle: "마감시 확인" },
             { id: 89, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "사골육수", spec: "6팩", unit: "박스", cycle: "마감시 확인" },
@@ -199,7 +203,7 @@
             { id: 103, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "물티슈", spec: "1600매", unit: "박스", cycle: "주 1회 (마감확인)" },
             { id: 104, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "무지 크라프트 종이컵", spec: "1000개", unit: "박스", cycle: "주 1회 (마감확인)" },
             { id: 105, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "일회용 반앞치마", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 106, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "츄파춥스 막대사탕 미니", spec: "", unit: "p", cycle: "필요시" },
+            { id: 106, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "츄파춥스 막대사탕 미니", spec: "", unit: "봉", cycle: "필요시" },
             { id: 107, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "수저포장지 (수저집)", spec: "최소", unit: "박스", cycle: "필요시" },
             { id: 108, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "치실", spec: "600개", unit: "박스", cycle: "필요시" },
             { id: 109, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "이지락 워터건 (분무기류)", spec: "", unit: "개", cycle: "필요시" },
@@ -257,7 +261,7 @@
             orderData.forEach(item => {
                 selectedState[item.id] = {
                     checked: false,
-                    qtyNum: 1, // 수량(숫자) 부분만 1, 2, 3으로 변함
+                    qtyNum: 1, 
                     customValue: ""
                 };
             });
@@ -290,8 +294,7 @@
                             const state = selectedState[item.id];
                             const isChecked = state.checked ? 'checked' : '';
                             
-                            // 사장님이 수정 요청하신 형태로 출력 텍스트 생성
-                            // spec이 있으면 '8개 1박스', 없으면 '1박스' 형태로 유연하게 연동
+                            // 사장님이 요구하신 최종 규격 스타일로 화면 및 계산 구성
                             const currentQtyText = item.spec !== "" ? `${item.spec} ${state.qtyNum}${item.unit}` : `${state.qtyNum}${item.unit}`;
 
                             return `
@@ -334,7 +337,6 @@
             const state = selectedState[id];
             const item = orderData.find(i => i.id === id);
             
-            // 박스/판/통 등의 수치 자체를 1씩 증감
             state.qtyNum = Math.max(1, state.qtyNum + direction);
             state.customValue = ""; 
             
@@ -394,7 +396,6 @@
                 text += `■ ${vendor}\n`;
                 grouped[vendor].forEach(item => {
                     const state = selectedState[item.id];
-                    // 사장님이 원하신 '8개 1박스' 스타일로 카톡 대화창 전송 텍스트 조합
                     const finalVal = state.customValue.trim() !== "" ? state.customValue : (item.spec !== "" ? `${item.spec} ${state.qtyNum}${item.unit}` : `${state.qtyNum}${item.unit}`);
                     text += `- ${item.name} : ${finalVal}\n`;
                 });
@@ -404,7 +405,7 @@
             text += "확인요청드립니다.";
 
             navigator.clipboard.writeText(text.trim()).then(() => {
-                alert('요구하신 묶음 기준 수량 스타일이 적용된 발주 리스트가 복사되었습니다!\n카카오톡 대화창에 붙여넣기 하세요.');
+                alert('모든 규격이 전면 수정된 최종 발주 리스트가 복사되었습니다!\n카카오톡 대화창에 붙여넣기 하세요.');
             }).catch(() => {
                 alert('복사에 실패했습니다.');
             });
