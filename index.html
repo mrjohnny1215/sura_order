@@ -88,139 +88,144 @@
     <div class="grid-container" id="card-container"></div>
 
     <script>
+        // 장부의 '확인 주기'에 따라 빈도가 높은 순(rank가 낮을수록 먼저 노출)으로 품목 자동 정렬 배치 완료
         const orderData = [
-            { id: 1, vendor: "수정물산 (고기)", category: "고기류", name: "제육", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
-            { id: 2, vendor: "수정물산 (고기)", category: "고기류", name: "수입 삼겹살(냉동)", spec: "", unit: "판", cycle: "필요시" },
-            { id: 3, vendor: "수정물산 (고기)", category: "고기류", name: "대패삼겹살", spec: "", unit: "kg", cycle: "필요시" },
-            { id: 4, vendor: "참기름 주문", category: "기름류", name: "들기름", spec: "", unit: "통", cycle: "월 1회 (말일)" },
-            { id: 5, vendor: "참기름 주문", category: "기름류", name: "참기름", spec: "", unit: "통", cycle: "월 1회 (말일)" },
-            { id: 6, vendor: "주왕산김치", category: "김치류", name: "총각김치", spec: "10kg", unit: "개", cycle: "주 1회 (화)" },
-            { id: 7, vendor: "주왕산김치", category: "김치류", name: "썰어진 맛김치", spec: "10kg", unit: "개", cycle: "주 1회 (화)" },
-            { id: 8, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "고등어", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
-            { id: 9, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "민어", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
-            { id: 10, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "삼치", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
-            { id: 11, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "갈치", spec: "", unit: "박스", cycle: "주 1회" },
-            { id: 12, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "낙지", spec: "", unit: "박스", cycle: "주 1회" },
-            { id: 13, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "꼬막살 (왕특)", spec: "", unit: "박스", cycle: "주 1회" },
-            
-            // 파파쿡 (소스류) - 카테고리명을 한글 '소스류'로 완벽하게 수정했습니다.
-            { id: 14, vendor: "파파쿡 (소스)", category: "소스류", name: "조림소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 15, vendor: "파파쿡 (소스)", category: "소스류", name: "불고기소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 16, vendor: "파파쿡 (소스)", category: "소스류", name: "낙지볶음소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 17, vendor: "파파쿡 (소스)", category: "소스류", name: "청국장소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 18, vendor: "파파쿡 (소스)", category: "소스류", name: "흑임자샐러드소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 19, vendor: "파파쿡 (소스)", category: "소스류", name: "달래간장소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 20, vendor: "파파쿡 (소스)", category: "소스류", name: "들깨볶음소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 21, vendor: "파파쿡 (소스)", category: "소스류", name: "장아찌간장소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 22, vendor: "파파쿡 (소스)", category: "소스류", name: "겉절이소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 23, vendor: "파파쿡 (소스)", category: "소스류", name: "된장나물소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 24, vendor: "파파쿡 (소스)", category: "소스류", name: "생선풍미소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            { id: 25, vendor: "파파쿡 (소스)", category: "소스류", name: "미역국(분말)소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
-            
-            { id: 26, vendor: "신흥정미소 (쌀)", category: "쌀류", name: "쌀 (20kg)", spec: "", unit: "마대", cycle: "7~10일 주기" },
-            { id: 27, vendor: "이성현 (식자재)", category: "농산물", name: "대파", spec: "", unit: "단", cycle: "격일 (월/수/금)" },
-            { id: 28, vendor: "이성현 (식자재)", category: "농산물", name: "양파", spec: "", unit: "망", cycle: "격일 (월/수/금)" },
-            { id: 29, vendor: "이성현 (식자재)", category: "농산물", name: "숙주나물", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 30, vendor: "이성현 (식자재)", category: "농산물", name: "양상추", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 31, vendor: "이성현 (식자재)", category: "농산물", name: "양배추", spec: "", unit: "망", cycle: "격일 (월/수/금)" },
-            { id: 32, vendor: "이성현 (식자재)", category: "농산물", name: "무", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 33, vendor: "이성현 (식자재)", category: "농산물", name: "치커리", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 34, vendor: "이성현 (식자재)", category: "농산물", name: "부추", spec: "", unit: "단", cycle: "격일 (월/수/금)" },
-            { id: 35, vendor: "이성현 (식자재)", category: "농산물", name: "쪽파", spec: "", unit: "단", cycle: "격일 (월/수/금)" },
-            { id: 36, vendor: "이성현 (식자재)", category: "농산물", name: "꽈리고추", spec: "", unit: "kg", cycle: "격일 (월/수/금)" },
-            { id: 37, vendor: "이성현 (식자재)", category: "농산물", name: "당근", spec: "", unit: "kg", cycle: "격일 (월/수/금)" },
-            { id: 38, vendor: "이성현 (식자재)", category: "농산물", name: "미나리", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 39, vendor: "이성현 (식자재)", category: "농산물", name: "통마늘", spec: "1~2봉", unit: "개", cycle: "필요시" },
-            { id: 40, vendor: "이성현 (식자재)", category: "농산물", name: "깐마늘", spec: "2kg", unit: "개", cycle: "필요시" },
-            { id: 41, vendor: "이성현 (식자재)", category: "농산물", name: "마늘쫑", spec: "", unit: "단", cycle: "필요시" },
-            { id: 42, vendor: "이성현 (식자재)", category: "농산물", name: "청양고추", spec: "각 소량", unit: "개", cycle: "필요시" },
-            { id: 43, vendor: "이성현 (식자재)", category: "농산물", name: "피망", spec: "각 소량", unit: "개", cycle: "필요시" },
-            { id: 44, vendor: "이성현 (식자재)", category: "농산물", name: "오이", spec: "각 소량", unit: "개", cycle: "필요시" },
-            { id: 45, vendor: "이성현 (식자재)", category: "농산물", name: "봄동", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 46, vendor: "이성현 (식자재)", category: "식자재", name: "두부", spec: "", unit: "판", cycle: "격일 (월/수/금)" },
-            { id: 47, vendor: "이성현 (식자재)", category: "식자재", name: "메추리알", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 48, vendor: "이성현 (식자재)", category: "식자재", name: "깐메추리알", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 49, vendor: "이성현 (식자재)", category: "식자재", name: "왕란(계란)", spec: "", unit: "판", cycle: "필요시" },
-            { id: 50, vendor: "이성현 (식자재)", category: "식자재", name: "당면", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 51, vendor: "이성현 (식자재)", category: "식자재", name: "찰흑미", spec: "5kg ×", unit: "봉", cycle: "필요시" },
-            { id: 52, vendor: "이성현 (식자재)", category: "식자재", name: "김자반", spec: "", unit: "봉", cycle: "필요시" },
+            // [우선순위 1] 격일 및 마감시 확인 품목 (가장 자주 시킴)
+            { id: 27, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "대파", spec: "", unit: "단", cycle: "격일 (월/수/금)" },
+            { id: 28, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "양파", spec: "", unit: "망", cycle: "격일 (월/수/금)" },
+            { id: 29, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "숙주나물", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 30, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "양상추", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 31, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "양배추", spec: "", unit: "망", cycle: "격일 (월/수/금)" },
+            { id: 32, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "무", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 33, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "치커리", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 34, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "부추", spec: "", unit: "단", cycle: "격일 (월/수/금)" },
+            { id: 35, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "쪽파", spec: "", unit: "단", cycle: "격일 (월/수/금)" },
+            { id: 36, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "꽈리고추", spec: "", unit: "kg", cycle: "격일 (월/수/금)" },
+            { id: 37, rank: 1, vendor: "이성현 (식자재)", category: "농산물", name: "당근", spec: "", unit: "kg", cycle: "격일 (월/수/금)" },
+            { id: 46, rank: 1, vendor: "이성현 (식자재)", category: "식자재", name: "두부", spec: "", unit: "판", cycle: "격일 (월/수/금)" },
+            { id: 47, rank: 1, vendor: "이성현 (식자재)", category: "식자재", name: "메추리알", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 48, rank: 1, vendor: "이성현 (식자재)", category: "식자재", name: "깐메추리알", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 50, rank: 1, vendor: "이성현 (식자재)", category: "식자재", name: "당면", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 83, rank: 1, vendor: "이성현 (식자재)", category: "음료류", name: "코카콜라", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 84, rank: 1, vendor: "이성현 (식자재)", category: "음료류", name: "제로콜라", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 85, rank: 1, vendor: "이성현 (식자재)", category: "음료류", name: "환타", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 86, rank: 1, vendor: "이성현 (식자재)", category: "음료류", name: "스프라이트", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
+            { id: 87, rank: 1, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "매원", spec: "8개", unit: "박스", cycle: "마감시 확인" },
+            { id: 88, rank: 1, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "단호박", spec: "14팩", unit: "박스", cycle: "마감시 확인" },
+            { id: 89, rank: 1, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "사골육수", spec: "6팩", unit: "박스", cycle: "마감시 확인" },
+            { id: 90, rank: 1, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "느타리버섯", spec: "6봉", unit: "박스", cycle: "마감시 확인" },
+            { id: 91, rank: 1, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "궁채", spec: "10kg", unit: "박스", cycle: "마감시 확인" },
+            { id: 92, rank: 1, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "궁채순", spec: "10kg", unit: "박스", cycle: "마감시 확인" },
+
+            // [우선순위 2] 주 2회 품목
+            { id: 1, rank: 2, vendor: "수정물산 (고기)", category: "고기류", name: "제육", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
+            { id: 8, rank: 2, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "고등어", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
+            { id: 9, rank: 2, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "민어", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
+            { id: 10, rank: 2, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "삼치", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
+
+            // [우선순위 3] 주 1회 확인 및 발주 품목
+            { id: 6, rank: 3, vendor: "주왕산김치", category: "김치류", name: "총각김치", spec: "10kg", unit: "개", cycle: "주 1회 (화)" },
+            { id: 7, rank: 3, vendor: "주왕산김치", category: "김치류", name: "썰어진 맛김치", spec: "10kg", unit: "개", cycle: "주 1회 (화)" },
+            { id: 11, rank: 3, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "갈치", spec: "", unit: "박스", cycle: "주 1회" },
+            { id: 12, rank: 3, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "낙지", spec: "", unit: "박스", cycle: "주 1회" },
+            { id: 13, rank: 3, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "꼬막살 (왕특)", spec: "", unit: "박스", cycle: "주 1회" },
+            { id: 14, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "조림소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 15, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "불고기소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 16, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "낙지볶음소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 17, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "청국장소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 18, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "흑임자샐러드소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 19, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "달래간장소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 20, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "들깨볶음소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 21, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "장아찌간장소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 22, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "겉절이소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 23, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "된장나물소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 24, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "생선풍미소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 25, rank: 3, vendor: "파파쿡 (소스)", category: "소스류", name: "미역국(분말)소스", spec: "", unit: "kg", isSource: true, cycle: "주 1회 (월)" },
+            { id: 103, rank: 3, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "물티슈", spec: "1600매", unit: "박스", cycle: "주 1회 (마감확인)" },
+            { id: 104, rank: 3, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "무지 크라프트 종이컵", spec: "1000개", unit: "박스", cycle: "주 1회 (마감확인)" },
+
+            // [우선순위 4] 정기 주기 품목
+            { id: 26, rank: 4, vendor: "신흥정미소 (쌀)", category: "쌀류", name: "쌀 (20kg)", spec: "", unit: "마대", cycle: "7~10일 주기" },
+
+            // [우선순위 5] 수시 및 필요시 확인 품목
+            { id: 2, rank: 5, vendor: "수정물산 (고기)", category: "고기류", name: "수입 삼겹살(냉동)", spec: "", unit: "판", cycle: "필요시" },
+            { id: 3, rank: 5, vendor: "수정물산 (고기)", category: "고기류", name: "대패삼겹살", spec: "", unit: "kg", cycle: "필요시" },
+            { id: 4, rank: 5, vendor: "참기름 주문", category: "기름류", name: "들기름", spec: "", unit: "통", cycle: "월 1회 (말일)" },
+            { id: 5, rank: 5, vendor: "참기름 주문", category: "기름류", name: "참기름", spec: "", unit: "통", cycle: "월 1회 (말일)" },
+            { id: 38, rank: 5, vendor: "이성현 (식자재)", category: "농산물", name: "미나리", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 39, rank: 5, vendor: "이성현 (식자재)", category: "농산물", name: "통마늘", spec: "1~2봉", unit: "개", cycle: "필요시" },
+            { id: 40, rank: 5, vendor: "이성현 (식자재)", category: "농산물", name: "깐마늘", spec: "2kg", unit: "개", cycle: "필요시" },
+            { id: 41, rank: 5, vendor: "이성현 (식자재)", category: "농산물", name: "마늘쫑", spec: "", unit: "단", cycle: "필요시" },
+            { id: 42, rank: 5, vendor: "이성현 (식자재)", category: "농산물", name: "청양고추", spec: "각 소량", unit: "개", cycle: "필요시" },
+            { id: 43, rank: 5, vendor: "이성현 (식자재)", category: "농산물", name: "피망", spec: "각 소량", unit: "개", cycle: "필요시" },
+            { id: 44, rank: 5, vendor: "이성현 (식자재)", category: "농산물", name: "오이", spec: "각 소량", unit: "개", cycle: "필요시" },
+            { id: 45, rank: 5, vendor: "이성현 (식자재)", category: "농산물", name: "봄동", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 49, rank: 5, vendor: "이성현 (식자재)", category: "식자재", name: "왕란(계란)", spec: "", unit: "판", cycle: "필요시" },
+            { id: 51, rank: 5, vendor: "이성현 (식자재)", category: "식자재", name: "찰흑미", spec: "5kg ×", unit: "봉", cycle: "필요시" },
+            { id: 52, rank: 5, vendor: "이성현 (식자재)", category: "식자재", name: "김자반", spec: "", unit: "봉", cycle: "필요시" },
             { id: 53, vendor: "이성현 (식자재)", category: "식자재", name: "깐은행", spec: "", unit: "봉", cycle: "필요시" },
-            { id: 54, vendor: "이성현 (식자재)", category: "식자재", name: "강남콩통조림", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 55, vendor: "이성현 (식자재)", category: "식자재", name: "사각어묵", spec: "", unit: "kg", cycle: "필요시" },
-            { id: 56, vendor: "이성현 (식자재)", category: "식자재", name: "절단꽃게", spec: "", unit: "kg", cycle: "필요시" },
-            { id: 57, vendor: "이성현 (식자재)", category: "식자재", name: "닭정육", spec: "", unit: "kg", cycle: "필요시" },
-            { id: 58, vendor: "이성현 (식자재)", category: "식자재", name: "해물모듬", spec: "", unit: "봉", cycle: "필요시" },
-            { id: 59, vendor: "이성현 (식자재)", category: "식자재", name: "참치통조림(대)", spec: "", unit: "봉", cycle: "필요시" },
-            { id: 60, vendor: "이성현 (식자재)", category: "조미료", name: "진간장", spec: "", unit: "통", cycle: "필요시" },
-            { id: 61, vendor: "이성현 (식자재)", category: "조미료", name: "국간장", spec: "", unit: "통", cycle: "필요시" },
-            { id: 62, vendor: "이성현 (식자재)", category: "조미료", name: "참치액", spec: "", unit: "통", cycle: "필요시" },
-            { id: 63, vendor: "이성현 (식자재)", category: "조미료", name: "노두유", spec: "", unit: "개", cycle: "필요시" },
-            { id: 64, vendor: "이성현 (식자재)", category: "조미료", name: "설탕", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
-            { id: 65, vendor: "이성현 (식자재)", category: "조미료", name: "미원", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
-            { id: 66, vendor: "이성현 (식자재)", category: "조미료", name: "맛소금", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
-            { id: 67, vendor: "이성현 (식자재)", category: "조미료", name: "꽃소금", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
-            { id: 68, vendor: "이성현 (식자재)", category: "조미료", name: "식용유", spec: "", unit: "말", cycle: "필요시" },
-            { id: 70, vendor: "이성현 (식자재)", category: "조미료", name: "들깨가루", spec: "", unit: "봉지", cycle: "필요시" },
-            { id: 71, vendor: "이성현 (식자재)", category: "조미료", name: "감자전분", spec: "", unit: "봉지", cycle: "필요시" },
-            { id: 72, vendor: "이성현 (식자재)", category: "조미료", name: "중력분 밀가루", spec: "", unit: "봉지", cycle: "필요시" },
-            { id: 73, vendor: "이성현 (식자재)", category: "조미료", name: "미림", spec: "", unit: "개", cycle: "필요시" },
-            { id: 74, vendor: "이성현 (식자재)", category: "조미료", name: "된장", spec: "", unit: "개", cycle: "필요시" },
-            { id: 75, vendor: "이성현 (식자재)", category: "조미료", name: "고추장", spec: "", unit: "개", cycle: "필요시" },
-            { id: 76, vendor: "이성현 (식자재)", category: "조미료", name: "혼다시", spec: "", unit: "개", cycle: "필요시" },
-            { id: 77, vendor: "이성현 (식자재)", category: "조미료", name: "맛술", spec: "", unit: "개", cycle: "필요시" },
-            { id: 78, vendor: "이성현 (식자재)", category: "조미료", name: "물엿", spec: "", unit: "개", cycle: "필요시" },
-            { id: 79, vendor: "이성현 (식자재)", category: "조미료", name: "마요네즈", spec: "", unit: "개", cycle: "필요시" },
-            { id: 80, vendor: "이성현 (식자재)", category: "조미료", name: "가쓰오부시", spec: "", unit: "개", cycle: "필요시" },
-            { id: 81, vendor: "이성현 (식자재)", category: "조미료", name: "통들깨", spec: "", unit: "개", cycle: "필요시" },
-            { id: 82, vendor: "이성현 (식자재)", category: "조미료", name: "검은깨", spec: "", unit: "개", cycle: "필요시" },
-            { id: 83, vendor: "이성현 (식자재)", category: "음료류", name: "코카콜라", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 84, vendor: "이성현 (식자재)", category: "음료류", name: "제로콜라", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 85, vendor: "이성현 (식자재)", category: "음료류", name: "환타", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            { id: 86, vendor: "이성현 (식자재)", category: "음료류", name: "스프라이트", spec: "", unit: "박스", cycle: "격일 (월/수/금)" },
-            
-            // 인터넷 발주 (저녁 마감)
-            { id: 87, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "매원", spec: "8개", unit: "박스", cycle: "마감시 확인" },
-            { id: 88, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "단호박", spec: "14팩", unit: "박스", cycle: "마감시 확인" },
-            { id: 89, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "사골육수", spec: "6팩", unit: "박스", cycle: "마감시 확인" },
-            { id: 90, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "느타리버섯", spec: "6봉", unit: "박스", cycle: "마감시 확인" },
-            { id: 91, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "궁채", spec: "10kg", unit: "박스", cycle: "마감시 확인" },
-            { id: 92, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "궁채순", spec: "10kg", unit: "박스", cycle: "마감시 확인" },
-            { id: 93, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "생율 (깐밤)", spec: "10팩", unit: "박스", cycle: "필요시" },
-            { id: 94, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "곤드레", spec: "10kg", unit: "박스", cycle: "필요시" },
-            { id: 95, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "깐더덕", spec: "10kg", unit: "박스", cycle: "필요시" },
-            { id: 96, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "오징어젓갈", spec: "20kg", unit: "박스", cycle: "필요시" },
-            { id: 97, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "파래김", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 98, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "맥코믹 후추 가루", spec: "", unit: "개", cycle: "필요시" },
-            { id: 100, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "꼬막", spec: "8봉", unit: "박스", cycle: "필요시" },
-            { id: 101, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "옥수수수염차원액", spec: "", unit: "통", cycle: "필요시" },
-            { id: 102, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "와사비", spec: "", unit: "개", cycle: "필요시" },
-            { id: 103, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "물티슈", spec: "1600매", unit: "박스", cycle: "주 1회 (마감확인)" },
-            { id: 104, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "무지 크라프트 종이컵", spec: "1000개", unit: "박스", cycle: "주 1회 (마감확인)" },
-            { id: 105, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "일회용 반앞치마", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 106, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "츄파춥스 막대사탕 미니", spec: "", unit: "p", cycle: "필요시" },
-            { id: 107, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "수저포장지 (수저집)", spec: "최소", unit: "박스", cycle: "필요시" },
-            { id: 108, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "치실", spec: "600개", unit: "박스", cycle: "필요시" },
-            { id: 109, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "이지락 워터건 (분무기류)", spec: "", unit: "개", cycle: "필요시" },
-            { id: 110, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "크린콜", spec: "", unit: "말통", cycle: "필요시" },
-            { id: 111, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "젤착화제", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 112, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "냅킨", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 113, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "행주", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 114, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "박스테이프", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 115, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "아이콘 칼라 화일 (명세서용)", spec: "", unit: "개", cycle: "필요시" },
-            { id: 116, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "커터칼", spec: "", unit: "개", cycle: "필요시" },
-            { id: 117, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "가글", spec: "250개입", unit: "박스", cycle: "필요시" },
-            { id: 118, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "니트릴장갑", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 119, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "라텍스장갑", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 120, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "쓰레기봉투 (파란색)", spec: "", unit: "묶음", cycle: "필요시" },
-            { id: 121, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "쓰레기봉투 (검정색)", spec: "", unit: "묶음", cycle: "필요시" },
-            { id: 122, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "위생장갑", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 123, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "롤팩", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 124, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "고무장갑", spec: "", unit: "개", cycle: "필요시" },
-            { id: 125, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "퐁퐁 주방세제", spec: "", unit: "말", cycle: "필요시" },
-            { id: 126, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "세제(비트)", spec: "", unit: "kg", cycle: "필요시" },
-            { id: 127, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "수세미 (철)", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 128, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "수세미 (녹색)", spec: "", unit: "박스", cycle: "필요시" },
-            { id: 129, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "식세기 세제", spec: "", unit: "통", cycle: "필요시" }
+            { id: 54, rank: 5, vendor: "이성현 (식자재)", category: "식자재", name: "강남콩통조림", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 55, rank: 5, vendor: "이성현 (식자재)", category: "식자재", name: "사각어묵", spec: "", unit: "kg", cycle: "필요시" },
+            { id: 56, rank: 5, vendor: "이성현 (식자재)", category: "식자재", name: "절단꽃게", spec: "", unit: "kg", cycle: "필요시" },
+            { id: 57, rank: 5, vendor: "이성현 (식자재)", category: "식자재", name: "닭정육", spec: "", unit: "kg", cycle: "필요시" },
+            { id: 58, rank: 5, vendor: "이성현 (식자재)", category: "식자재", name: "해물모듬", spec: "", unit: "봉", cycle: "필요시" },
+            { id: 59, rank: 5, vendor: "이성현 (식자재)", category: "식자재", name: "참치통조림(대)", spec: "", unit: "봉", cycle: "필요시" },
+            { id: 60, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "진간장", spec: "", unit: "통", cycle: "필요시" },
+            { id: 61, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "국간장", spec: "", unit: "통", cycle: "필요시" },
+            { id: 62, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "참치액", spec: "", unit: "통", cycle: "필요시" },
+            { id: 63, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "노두유", spec: "", unit: "개", cycle: "필요시" },
+            { id: 64, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "설탕", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
+            { id: 65, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "미원", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
+            { id: 66, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "맛소금", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
+            { id: 67, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "꽃소금", spec: "", unit: "3kg 단위 봉지", cycle: "필요시" },
+            { id: 68, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "식용유", spec: "", unit: "말", cycle: "필요시" },
+            { id: 70, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "들깨가루", spec: "", unit: "봉지", cycle: "필요시" },
+            { id: 71, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "감자전분", spec: "", unit: "봉지", cycle: "필요시" },
+            { id: 72, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "중력분 밀가루", spec: "", unit: "봉지", cycle: "필요시" },
+            { id: 73, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "미림", spec: "", unit: "개", cycle: "필요시" },
+            { id: 74, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "된장", spec: "", unit: "개", cycle: "필요시" },
+            { id: 75, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "고추장", spec: "", unit: "개", cycle: "필요시" },
+            { id: 76, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "혼다시", spec: "", unit: "개", cycle: "필요시" },
+            { id: 77, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "맛술", spec: "", unit: "개", cycle: "필요시" },
+            { id: 78, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "물엿", spec: "", unit: "개", cycle: "필요시" },
+            { id: 79, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "마요네즈", spec: "", unit: "개", cycle: "필요시" },
+            { id: 80, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "가쓰오부시", spec: "", unit: "개", cycle: "필요시" },
+            { id: 81, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "통들깨", spec: "", unit: "개", cycle: "필요시" },
+            { id: 82, rank: 5, vendor: "이성현 (식자재)", category: "조미료", name: "검은깨", spec: "", unit: "개", cycle: "필요시" },
+            { id: 93, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "생율 (깐밤)", spec: "10팩", unit: "박스", cycle: "필요시" },
+            { id: 94, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "곤드레", spec: "10kg", unit: "박스", cycle: "필요시" },
+            { id: 95, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "깐더덕", spec: "10kg", unit: "박스", cycle: "필요시" },
+            { id: 96, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "오징어젓갈", spec: "20kg", unit: "박스", cycle: "필요시" },
+            { id: 97, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "파래김", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 98, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "맥코믹 후추 가루", spec: "", unit: "개", cycle: "필요시" },
+            { id: 100, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "꼬막", spec: "8봉", unit: "박스", cycle: "필요시" },
+            { id: 101, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "옥수수수염차원액", spec: "", unit: "통", cycle: "필요시" },
+            { id: 102, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "인터넷식재료", name: "와사비", spec: "", unit: "개", cycle: "필요시" },
+            { id: 105, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "일회용 반앞치마", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 106, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "츄파춥스 막대사탕 미니", spec: "", unit: "p", cycle: "필요시" },
+            { id: 107, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "수저포장지 (수저집)", spec: "최소", unit: "박스", cycle: "필요시" },
+            { id: 108, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "치실", spec: "600개", unit: "박스", cycle: "필요시" },
+            { id: 109, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "이지락 워터건 (분무기류)", spec: "", unit: "개", cycle: "필요시" },
+            { id: 110, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "크린콜", spec: "", unit: "말통", cycle: "필요시" },
+            { id: 111, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "젤착화제", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 112, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "냅킨", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 113, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "행주", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 114, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "박스테이프", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 115, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "아이콘 칼라 화일 (명세서용)", spec: "", unit: "개", cycle: "필요시" },
+            { id: 116, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "커터칼", spec: "", unit: "개", cycle: "필요시" },
+            { id: 117, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "가글", spec: "250개입", unit: "박스", cycle: "필요시" },
+            { id: 118, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "니트릴장갑", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 119, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "라텍스장갑", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 120, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "쓰레기봉투 (파란색)", spec: "", unit: "묶음", cycle: "필요시" },
+            { id: 121, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "쓰레기봉투 (검정색)", spec: "", unit: "묶음", cycle: "필요시" },
+            { id: 122, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "위생장갑", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 123, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "롤팩", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 124, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "고무장갑", spec: "", unit: "개", cycle: "필요시" },
+            { id: 125, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "퐁퐁 주방세제", spec: "", unit: "말", cycle: "필요시" },
+            { id: 126, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "세제(비트)", spec: "", unit: "kg", cycle: "필요시" },
+            { id: 127, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "수세미 (철)", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 128, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "수세미 (녹색)", spec: "", unit: "박스", cycle: "필요시" },
+            { id: 129, rank: 5, vendor: "인터넷 발주 (저녁 마감)", category: "매장잡화", name: "식세기 세제", spec: "", unit: "통", cycle: "필요시" }
         ];
 
         let selectedState = {};
@@ -260,6 +265,8 @@
                 };
             });
 
+            // 렌더링 시 rank가 낮은 순(자주 시키는 순)으로 화면에 배치
+            orderData.sort((a, b) => a.rank - b.rank);
             renderCards(orderData);
         }
 
@@ -267,6 +274,7 @@
             const container = document.getElementById('card-container');
             container.innerHTML = '';
 
+            // 거래처별 그룹 구성 (순서는 데이터의 rank 정렬 상태 유지)
             const grouped = data.reduce((acc, item) => {
                 if (!acc[item.vendor]) acc[item.vendor] = [];
                 acc[item.vendor].push(item);
@@ -301,7 +309,7 @@
                                         <div class="checkbox-btn"></div>
                                         <div class="item-info">
                                             <div class="item-name">${item.name}</div>
-                                            <div class="item-details">[${item.category}] 주기: ${item.cycle}</div>
+                                            <div class="item-details">[${item.cycle}] 주기</div>
                                         </div>
                                     </div>
                                     <div class="volume-zone">
@@ -386,6 +394,8 @@
             }
 
             let text = `[${formattedDateString} 수라간 발주 요청 건]\n\n`;
+            
+            // 데이터 배열 순서대로(rank 높은 빈도수 순서대로) 텍스트를 모아서 카톡 전송 텍스트 생성
             const activeItems = orderData.filter(item => selectedState[item.id].checked);
             
             const grouped = activeItems.reduce((acc, item) => {
@@ -413,7 +423,7 @@
             text += "확인요청드립니다.";
 
             navigator.clipboard.writeText(text.trim()).then(() => {
-                alert('카테고리 오타가 교정된 최종 발주 리스트가 복사되었습니다!\n카카오톡 대화창에 붙여넣기 하세요.');
+                alert('자주 시키는 품목순 정렬 및 확인문구가 포함된 발주 리스트가 복사되었습니다!');
             }).catch(() => {
                 alert('복사에 실패했습니다.');
             });
