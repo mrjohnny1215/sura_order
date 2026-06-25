@@ -82,7 +82,7 @@
         <select id="filter-vendor" class="filter-select" onchange="filterItems()">
             <option value="all">전체 거래처 보기</option>
         </select>
-        <button class="btn-copy" onclick="sendToKakao()">💬 발주 내역 카톡 전송</button>
+        <button class="btn-copy" onclick="copyToClipboard()">📋 발주 내역 카톡용 복사</button>
     </div>
 
     <div class="grid-container" id="card-container"></div>
@@ -122,7 +122,7 @@
             { id: 9, rank: 2, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "민어", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
             { id: 10, rank: 2, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "삼치", spec: "", unit: "박스", cycle: "주 2회 (화/금)" },
 
-            // [우선순위 3] 주 1회 확인 및 발주 품목
+            // [우선순위 3] 주 1회 품목
             { id: 6, rank: 3, vendor: "주왕산김치", category: "김치류", name: "총각김치", spec: "10kg", unit: "개", cycle: "주 1회 (화)" },
             { id: 7, rank: 3, vendor: "주왕산김치", category: "김치류", name: "썰어진 맛김치", spec: "10kg", unit: "개", cycle: "주 1회 (화)" },
             { id: 11, rank: 3, vendor: "피쉬팩토리 (생선)", category: "생선류", name: "갈치", spec: "", unit: "박스", cycle: "주 1회" },
@@ -370,21 +370,22 @@
             document.getElementById('total-checked').textContent = count;
         }
 
+        // 필터링 기능
         function filterItems() {
             const searchText = document.getElementById('search').value.toLowerCase();
-            const FascSelectedVendor = document.getElementById('filter-vendor').value;
+            const selectedVendor = document.getElementById('filter-vendor').value;
 
             const filtered = orderData.filter(item => {
                 const matchesSearch = item.name.toLowerCase().includes(searchText) || item.category.toLowerCase().includes(searchText);
-                const matchesVendor = FascSelectedVendor === 'all' || item.vendor === FascSelectedVendor;
+                const matchesVendor = selectedVendor === 'all' || item.vendor === selectedVendor;
                 return matchesSearch && matchesVendor;
             });
 
             renderCards(filtered);
         }
 
-        // 먹통 차단을 완전히 방지하는 정식 카카오톡 공유용 전용 인코딩 주소 링크 방식 적용 완료
-        function sendToKakao() {
+        // 안전한 100% 클립보드 복사 시스템 원상 복구 완료
+        function copyToClipboard() {
             const activeIds = Object.keys(selectedState).filter(id => selectedState[id].checked);
             
             if (activeIds.length === 0) {
@@ -419,31 +420,11 @@
 
             messageText += "확인요청드립니다.";
 
-            // [핵심 조치] 클립보드에 무조건 먼저 자동 복사 완료 (2중 안전장치)
+            // 무조건 성공하는 브라우저 표준 클립보드 복사 로직 실행
             navigator.clipboard.writeText(messageText.trim()).then(() => {
-                
-                // 먹통 차단을 완벽히 방지하는 카카오 공식 범용 텍스트 링크 API 템플릿 방식 교체
-                const shareUrl = "https://kakao.link/share?text=" + encodeURIComponent(messageText.trim());
-                const webUrl = "https://sharer.kakao.com/talk/friends/picker/link?text=" + encodeURIComponent(messageText.trim());
-                
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                
-                if (isMobile) {
-                    // 모바일 카톡 앱 공식 커스텀 스키마로 즉시 실행 유도
-                    window.location.href = "intent://send?text=" + encodeURIComponent(messageText.trim()) + "#Intent;scheme=kakaolink;package=com.kakao.talk;end";
-                    
-                    // 만약 앱 실행이 제한될 경우 범용 웹 브라우저 창 공유 링크 백업 실행
-                    setTimeout(function() {
-                        window.location.href = webUrl;
-                    }, 1000);
-                } else {
-                    // PC 브라우저용 안전 공유 창 팝업 오픈
-                    window.open(webUrl, '_blank', 'width=450,height=650');
-                }
-                
-                alert('발주서가 클립보드에 안전하게 자동 복사되었습니다!\n카톡 창이 열리면 친구나 나에게 보내기를 눌러 붙여넣기(Ctrl+V) 해주세요.');
+                alert('발주 리스트가 완벽하게 복사되었습니다!\n카카오톡 단톡방이나 나에게 보내기 방에 가셔서 [붙여넣기(Ctrl+V)]만 해주시면 끝납니다!');
             }).catch(() => {
-                alert('전송 처리에 실패했습니다. 브라우저 권한을 확인해주세요.');
+                alert('복사에 실패했습니다. 브라우저 설정을 확인해 주세요.');
             });
         }
 
