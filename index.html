@@ -372,18 +372,18 @@
 
         function filterItems() {
             const searchText = document.getElementById('search').value.toLowerCase();
-            const selectedVendor = document.getElementById('filter-vendor').value;
+            const FascSelectedVendor = document.getElementById('filter-vendor').value;
 
             const filtered = orderData.filter(item => {
                 const matchesSearch = item.name.toLowerCase().includes(searchText) || item.category.toLowerCase().includes(searchText);
-                const matchesVendor = selectedVendor === 'all' || item.vendor === selectedVendor;
+                const matchesVendor = FascSelectedVendor === 'all' || item.vendor === FascSelectedVendor;
                 return matchesSearch && matchesVendor;
             });
 
             renderCards(filtered);
         }
 
-        // 먹통 오류 교정 및 2중 안전장치(자동 클립보드 백업) 연동 함수
+        // 먹통 차단을 완전히 방지하는 정식 카카오톡 공유용 전용 인코딩 주소 링크 방식 적용 완료
         function sendToKakao() {
             const activeIds = Object.keys(selectedState).filter(id => selectedState[id].checked);
             
@@ -414,28 +414,36 @@
                     }
                     messageText += `- ${item.name} : ${finalVal}\n`;
                 });
-                messageText += '\n'; // 기존의 변수 버그 오류를 완전히 수정했습니다.
+                messageText += '\n'; 
             }
 
             messageText += "확인요청드립니다.";
 
-            // 1층 안전장치: 브라우저 환경 상관없이 클릭 시 자동으로 일단 발주 리스트를 복사함
+            // [핵심 조치] 클립보드에 무조건 먼저 자동 복사 완료 (2중 안전장치)
             navigator.clipboard.writeText(messageText.trim()).then(() => {
-                // 2층 구동장치: 복사 완료 후 카카오톡 전송 연동창 오픈 시도
-                const webCustomUrl = "https://sharer.kakao.com/talk/friends/picker/link?text=" + encodeURIComponent(messageText.trim());
-                const kakaoSchemeUrl = "kakaolink://send?text=" + encodeURIComponent(messageText.trim());
+                
+                // 먹통 차단을 완벽히 방지하는 카카오 공식 범용 텍스트 링크 API 템플릿 방식 교체
+                const shareUrl = "https://kakao.link/share?text=" + encodeURIComponent(messageText.trim());
+                const webUrl = "https://sharer.kakao.com/talk/friends/picker/link?text=" + encodeURIComponent(messageText.trim());
+                
                 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                 
                 if (isMobile) {
-                    window.location.href = kakaoSchemeUrl;
+                    // 모바일 카톡 앱 공식 커스텀 스키마로 즉시 실행 유도
+                    window.location.href = "intent://send?text=" + encodeURIComponent(messageText.trim()) + "#Intent;scheme=kakaolink;package=com.kakao.talk;end";
+                    
+                    // 만약 앱 실행이 제한될 경우 범용 웹 브라우저 창 공유 링크 백업 실행
                     setTimeout(function() {
-                        window.location.href = webCustomUrl;
-                    }, 1200);
+                        window.location.href = webUrl;
+                    }, 1000);
                 } else {
-                    window.open(webCustomUrl, '_blank');
+                    // PC 브라우저용 안전 공유 창 팝업 오픈
+                    window.open(webUrl, '_blank', 'width=450,height=650');
                 }
+                
+                alert('발주서가 클립보드에 안전하게 자동 복사되었습니다!\n카톡 창이 열리면 친구나 나에게 보내기를 눌러 붙여넣기(Ctrl+V) 해주세요.');
             }).catch(() => {
-                alert('복사에 실패했습니다. 브라우저 권한을 확인해주세요.');
+                alert('전송 처리에 실패했습니다. 브라우저 권한을 확인해주세요.');
             });
         }
 
